@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Sistem Pengelolaan Kost | Admin Panel</title>
-    <!-- Google Fonts & Font Awesome -->
-    
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- CSS Eksternal -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -74,14 +72,14 @@
 </div>
 
 <script>
-    // ======================= DATA STORAGE =======================
+    
     let kostData = {
         kamar: [],
         penyewa: [],
         transaksi: []
     };
 
-    // Data default awal (jika localstorage kosong)
+   
     const defaultKamar = [
         { id: "k1", nomor: "A1", harga: 550000, status: "terisi", penyewaId: "p1" },
         { id: "k2", nomor: "A2", harga: 550000, status: "terisi", penyewaId: "p2" },
@@ -107,7 +105,7 @@
             kostData = { kamar: defaultKamar, penyewa: defaultPenyewa, transaksi: defaultTransaksi };
             saveData();
         }
-        // sinkronisasi status kamar berdasarkan penyewaId
+        
         kostData.kamar.forEach(kamar => {
             const adaPenyewa = kostData.penyewa.some(p => p.kamarId === kamar.id);
             kamar.status = adaPenyewa ? "terisi" : "kosong";
@@ -125,11 +123,182 @@
         localStorage.setItem("kostManager", JSON.stringify(kostData));
     }
 
-    // helper
+    
     function getKamarById(id) { return kostData.kamar.find(k => k.id === id); }
     function getPenyewaById(id) { return kostData.penyewa.find(p => p.id === id); }
+    
+    let currentPage = "dashboard";
 
-    // TRANSAKSI
+    function render() {
+        const container = document.getElementById("mainContent");
+        if(!container) return;
+        if(currentPage === "dashboard") renderDashboard(container);
+        else if(currentPage === "kamar") renderKamarPage(container);
+        else if(currentPage === "penyewa") renderPenyewaPage(container);
+        else if(currentPage === "transaksi") renderTransaksiPage(container);
+    }
+    function renderDashboard(container) {
+        const totalKamar = kostData.kamar.length;
+        const terisi = kostData.kamar.filter(k => k.status === "terisi").length;
+        const kosong = totalKamar - terisi;
+        const bulanIni = new Date().toLocaleString('id', { month: 'long', year: 'numeric' });
+        const pendapatanBulanIni = kostData.transaksi.filter(t => t.bulan === bulanIni && t.status === "Lunas")
+                                    .reduce((sum, t) => sum + t.jumlah, 0);
+        
+        const html = `
+            <div class="stats-grid">
+                <div class="stat-card"><h4><i class="fas fa-bed"></i> Total Kamar</h4><div class="stat-number">${totalKamar}</div><div class="stat-desc">Seluruh kamar</div></div>
+                <div class="stat-card"><h4><i class="fas fa-user-check"></i> Kamar Terisi</h4><div class="stat-number">${terisi}</div><div class="stat-desc">${Math.round(terisi/totalKamar*100)}% okupansi</div></div>
+                <div class="stat-card"><h4><i class="fas fa-door-closed"></i> Kamar Kosong</h4><div class="stat-number">${kosong}</div><div class="stat-desc">Tersedia</div></div>
+                <div class="stat-card"><h4><i class="fas fa-money-bill-wave"></i> Pendapatan Bulan Ini</h4><div class="stat-number">Rp ${pendapatanBulanIni.toLocaleString()}</div><div class="stat-desc">${bulanIni}</div></div>
+            </div>
+            <div class="card-panel">
+                <div class="card-header"><h3><i class="fas fa-chart-line"></i> Ringkasan Aktifitas</h3></div>
+                <p>Total penyewa aktif: ${kostData.penyewa.length} orang | Total transaksi tercatat: ${kostData.transaksi.length}</p>
+                <hr style="margin:1rem 0">
+                <div><i class="fas fa-info-circle"></i> Sistem siap pakai, kelola kamar & penyewa dengan mudah.</div>
+            </div>
+        `;
+        container.innerHTML = html;
+    }
+    let editKamarTemp = null;
+    function renderKamarPage(container) {
+        const kamarList = [...kostData.kamar];
+        let formHtml = `
+            <div class="card-panel">
+                <div class="card-header"><h3> ${editKamarTemp ? 'Edit Kamar' : 'Tambah Kamar'}</h3></div>
+                <div class="form-row">
+                    <div class="form-group"><input type="text" id="kamarNomor" placeholder="Nomor Kamar (Contoh: C3)" value="${editKamarTemp ? editKamarTemp.nomor : ''}"></div>
+                    <div class="form-group"><input type="number" id="kamarHarga" placeholder="Harga per bulan" value="${editKamarTemp ? editKamarTemp.harga : ''}"></div>
+                    <div class="form-group"><button id="simpanKamarBtn" class="btn-primary"><i class="fas fa-save"></i> ${editKamarTemp ? 'Update' : 'Simpan'}</button>
+                    ${editKamarTemp ? `<button id="batalEditKamar" class="btn-primary btn-warning" style="background:#6c757d;">Batal</button>` : ''}</div>
+                </div>
+            </div>
+            <div class="card-panel">
+                <div class="card-header"><h3><i class="fas fa-table-list"></i> Daftar Kamar</h3></div>
+                <table>
+                    <thead><tr><th>No Kamar</th><th>Harga</th><th>Status</th><th>Penyewa</th><th>Aksi</th></tr></thead>
+                    <tbody>
+                        ${kamarList.map(k => {
+                            const penyewaNama = k.penyewaId ? (getPenyewaById(k.penyewaId)?.nama || '-') : '-';
+                            return `<tr>
+                                <td>${k.nomor}</td><td>Rp ${k.harga.toLocaleString()}</td>
+                                <td><span class="badge ${k.status === 'terisi' ? 'badge-success' : ''}">${k.status === 'terisi' ? 'Terisi' : 'Kosong'}</span></td>
+                                <td>${penyewaNama}</td>
+                                <td class="action-icons">
+                                    <i class="fas fa-edit" onclick="editKamarAction('${k.id}')"></i>
+                                    <i class="fas fa-trash-alt" style="color:#ef4444;" onclick="hapusKamarAction('${k.id}')"></i>
+                                </td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+        container.innerHTML = formHtml;
+        document.getElementById("simpanKamarBtn")?.addEventListener("click", function() {
+            const nomor = document.getElementById("kamarNomor").value.trim();
+            const harga = parseInt(document.getElementById("kamarHarga").value);
+            if(!nomor || isNaN(harga)) { alert("Isi nomor dan harga dengan benar"); return; }
+            if(editKamarTemp) {
+                editKamarTemp.nomor = nomor;
+                editKamarTemp.harga = harga;
+                saveData();
+                editKamarTemp = null;
+            } else {
+                const newId = "k" + Date.now();
+                kostData.kamar.push({ id: newId, nomor, harga, status: "kosong", penyewaId: null });
+                saveData();
+            }
+            renderKamarPage(container);
+        });
+        const batalBtn = document.getElementById("batalEditKamar");
+        if(batalBtn) batalBtn.onclick = () => { editKamarTemp = null; renderKamarPage(container); };
+        window.editKamarAction = (id) => {
+            editKamarTemp = kostData.kamar.find(k => k.id === id);
+            renderKamarPage(container);
+        };
+        window.hapusKamarAction = (id) => {
+            if(confirm("Hapus kamar? Semua penyewa yang terkait akan kehilangan referensi.")) {
+                kostData.kamar = kostData.kamar.filter(k => k.id !== id);
+                kostData.penyewa = kostData.penyewa.filter(p => p.kamarId !== id);
+                saveData();
+                renderKamarPage(container);
+            }
+        };
+    }
+    let editPenyewaTemp = null;
+    function renderPenyewaPage(container) {
+        const kamarOptions = kostData.kamar.filter(k => k.status === "kosong" || (editPenyewaTemp && editPenyewaTemp.kamarId === k.id)).map(k => `<option value="${k.id}" ${editPenyewaTemp?.kamarId === k.id ? 'selected' : ''}>${k.nomor} (${k.harga.toLocaleString()})</option>`);
+        const html = `
+            <div class="card-panel">
+                <div class="card-header"><h3><i class="fas fa-user-plus"></i> ${editPenyewaTemp ? 'Edit Penyewa' : 'Tambah Penyewa'}</h3></div>
+                <div class="form-row">
+                    <div class="form-group"><input id="penyewaNama" placeholder="Nama Lengkap" value="${editPenyewaTemp?.nama || ''}"></div>
+                    <div class="form-group"><input id="penyewaHp" placeholder="No HP" value="${editPenyewaTemp?.noHp || ''}"></div>
+                    <div class="form-group"><input id="penyewaTgl" type="date" value="${editPenyewaTemp?.tglMasuk || ''}"></div>
+                    <div class="form-group"><select id="penyewaKamar"><option value="">-- Pilih Kamar --</option>${kamarOptions}</select></div>
+                    <div><button id="simpanPenyewaBtn" class="btn-primary">Simpan</button> ${editPenyewaTemp ? `<button id="batalPenyewa" class="btn-primary btn-warning" style="background:#6c757d;">Batal</button>` : ''}</div>
+                </div>
+            </div>
+            <div class="card-panel">
+                <h3>Daftar Penyewa Aktif</h3>
+                <table><thead><tr><th>Nama</th><th>Kamar</th><th>No HP</th><th>Tgl Masuk</th><th>Aksi</th></tr></thead><tbody>
+                    ${kostData.penyewa.map(p => {
+                        const kamar = getKamarById(p.kamarId);
+                        return `<tr><td>${p.nama}</td><td>${kamar?.nomor || 'Tidak ada'}</td><td>${p.noHp}</td><td>${p.tglMasuk}</td>
+                        <td class="action-icons"><i class="fas fa-edit" onclick="editPenyewa('${p.id}')"></i> <i class="fas fa-trash-alt" style="color:#ef4444;" onclick="hapusPenyewa('${p.id}')"></i></td></tr>`;
+                    }).join('')}
+                </tbody></table>
+            </div>
+        `;
+        container.innerHTML = html;
+        document.getElementById("simpanPenyewaBtn")?.addEventListener("click", ()=>{
+            const nama = document.getElementById("penyewaNama").value.trim();
+            const hp = document.getElementById("penyewaHp").value;
+            const tgl = document.getElementById("penyewaTgl").value;
+            const kamarId = document.getElementById("penyewaKamar").value;
+            if(!nama || !hp || !tgl || !kamarId) { alert("Isi semua data dan pilih kamar!"); return; }
+            const selectedKamar = kostData.kamar.find(k => k.id === kamarId);
+            if(selectedKamar.status === "terisi" && (!editPenyewaTemp || editPenyewaTemp.kamarId !== kamarId)) {
+                alert("Kamar sudah terisi oleh penyewa lain!"); return;
+            }
+            if(editPenyewaTemp) {
+                editPenyewaTemp.nama = nama; editPenyewaTemp.noHp = hp; editPenyewaTemp.tglMasuk = tgl;
+                const oldKamar = editPenyewaTemp.kamarId;
+                if(oldKamar !== kamarId) {
+                    const oldKamarObj = kostData.kamar.find(k => k.id === oldKamar);
+                    if(oldKamarObj) { oldKamarObj.status = "kosong"; oldKamarObj.penyewaId = null; }
+                    editPenyewaTemp.kamarId = kamarId;
+                    selectedKamar.status = "terisi"; selectedKamar.penyewaId = editPenyewaTemp.id;
+                }
+                saveData();
+                editPenyewaTemp = null;
+            } else {
+                const newId = "p" + Date.now();
+                const newPenyewa = { id: newId, nama, noHp: hp, kamarId, tglMasuk: tgl };
+                kostData.penyewa.push(newPenyewa);
+                const kamar = kostData.kamar.find(k => k.id === kamarId);
+                if(kamar) { kamar.status = "terisi"; kamar.penyewaId = newId; }
+                saveData();
+            }
+            renderPenyewaPage(container);
+        });
+        if(document.getElementById("batalPenyewa")) document.getElementById("batalPenyewa").onclick = () => { editPenyewaTemp = null; renderPenyewaPage(container); };
+        window.editPenyewa = (id) => { editPenyewaTemp = kostData.penyewa.find(p => p.id === id); renderPenyewaPage(container); };
+        window.hapusPenyewa = (id) => {
+            if(confirm("Hapus penyewa? Kamar akan dikosongkan")){
+                const penyewa = kostData.penyewa.find(p => p.id === id);
+                if(penyewa) {
+                    const kamar = kostData.kamar.find(k => k.id === penyewa.kamarId);
+                    if(kamar){ kamar.status = "kosong"; kamar.penyewaId = null; }
+                    kostData.penyewa = kostData.penyewa.filter(p => p.id !== id);
+                    saveData();
+                    renderPenyewaPage(container);
+                }
+            }
+        };
+    }
     function renderTransaksiPage(container) {
         const penyewaList = kostData.penyewa;
         const html = `
@@ -175,7 +344,6 @@
         };
     }
 
-    // ========= LOGIN / LOGOUT & NAVIGATION =========
     function initApp() {
         loadData();
         const loginDiv = document.getElementById("loginPage");
@@ -199,7 +367,7 @@
             document.getElementById("username").value = "";
             document.getElementById("password").value = "";
         });
-        // menu sidebar
+        
         document.querySelectorAll(".nav-item").forEach(item => {
             item.addEventListener("click", (e) => {
                 document.querySelectorAll(".nav-item").forEach(nav => nav.classList.remove("active"));
