@@ -130,3 +130,145 @@ body {
     color: #334155;
 }
 
+/* ---------- DASHBOARD APP (hidden awal) ---------- */
+.dashboard-app {
+    display: none;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Layout utama */
+.app-wrapper {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 280px;
+    background: #0f172a;
+    color: #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.2s;
+    box-shadow: 4px 0 12px rgba(0,0,0,0.05);
+    z-index: 10;
+}
+
+.sidebar-header {
+    padding: 1.8rem 1.5rem;
+    border-bottom: 1px solid #1e293b;
+}
+.sidebar-header h3 {
+    font-weight: 700;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+}
+.sidebar-header h3 i {
+    color: #3b82f6;
+}
+.sidebar-header p {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    margin-top: 5px;
+}
+
+.nav-menu {
+    flex: 1;
+    padding: 1.8rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0.8rem 1rem;
+    border-radius: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s;
+    color: #cbd5e1;
+}
+.nav-item i {
+    width: 24px;
+    font-size: 1.2rem;
+}
+.nav-item.active {
+    background: #3b82f6;
+    color: white;
+    box-shadow: 0 6px 12px -8px rgba(59,130,246,0.3);
+}
+.nav-item:hover:not(.active) {
+    background: #1e293b;
+    color: white;
+}
+
+.logout-btn {
+    margin: 1.5rem 1rem;
+    background: rgba(239, 68, 68, 0.15);
+    border-radius: 1rem;
+    padding: 0.8rem;
+    text-align: center;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #f87171;
+    border: 1px solid rgba(239,68,68,0.2);
+}
+.logout-btn:hover {
+    background: #ef4444;
+    color: white;
+}
+
+/* MAIN CONTENT */
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem 2rem;
+    background: #f8fafc;
+}
+
+/* Kartu dashboard */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+.stat-card {
+    background: white;
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+    border: 1px solid #e2e8f0;
+    transition: 0.2s;
+}
+.stat-card h4 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+}
+.stat-number {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+.stat-desc {
+    font-size: 0.8rem;
+    color: #3b82f6;
+    margin-top: 0.5rem;
+}

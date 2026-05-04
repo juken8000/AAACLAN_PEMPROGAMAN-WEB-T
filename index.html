@@ -129,4 +129,87 @@
     function getKamarById(id) { return kostData.kamar.find(k => k.id === id); }
     function getPenyewaById(id) { return kostData.penyewa.find(p => p.id === id); }
 
-    
+    // TRANSAKSI
+    function renderTransaksiPage(container) {
+        const penyewaList = kostData.penyewa;
+        const html = `
+            <div class="card-panel">
+                <h3><i class="fas fa-receipt"></i> Catat Pembayaran</h3>
+                <div class="form-row">
+                    <select id="transPenyewa"><option value="">-- Pilih Penyewa --</option>${penyewaList.map(p => <option value="${p.id}">${p.nama}</option>)}</select>
+                    <input id="transBulan" placeholder="Bulan" value="${new Date().toLocaleString('id', { month: 'long', year: 'numeric' })}">
+                    <input id="transJumlah" type="number" placeholder="Jumlah Bayar">
+                    <button id="tambahTransaksiBtn" class="btn-primary">Tambah Transaksi</button>
+                </div>
+            </div>
+            <div class="card-panel">
+                <h3>Riwayat Transaksi</h3>
+                <table><thead><tr><th>Penyewa</th><th>Bulan</th><th>Jumlah</th><th>Status</th><th>Aksi</th></tr></thead><tbody>
+                    ${kostData.transaksi.map(t => {
+                        const penyewa = getPenyewaById(t.penyewaId);
+                        return `<tr><td>${penyewa?.nama || '-'}</td><td>${t.bulan}</td><td>Rp ${t.jumlah.toLocaleString()}</td><td><span class="badge ${t.status === 'Lunas' ? 'badge-success' : ''}">${t.status}</span></td>
+                        <td><i class="fas fa-check-circle" style="color:green; cursor:pointer;" onclick="lunaskanTransaksi('${t.id}')"></i> <i class="fas fa-trash-alt" style="color:red;cursor:pointer;" onclick="hapusTransaksi('${t.id}')"></i></td></tr>`;
+                    }).join('')}
+                </tbody></table>
+            </div>
+        `;
+        container.innerHTML = html;
+        document.getElementById("tambahTransaksiBtn")?.addEventListener("click", () => {
+            const penyewaId = document.getElementById("transPenyewa").value;
+            const bulan = document.getElementById("transBulan").value;
+            const jumlah = parseInt(document.getElementById("transJumlah").value);
+            if(!penyewaId || !bulan || isNaN(jumlah)) { alert("Lengkapi data!"); return; }
+            const newId = "t"+Date.now();
+            kostData.transaksi.push({ id: newId, penyewaId, bulan, jumlah, status: "Belum Lunas", tglBayar: null });
+            saveData();
+            renderTransaksiPage(container);
+        });
+        window.lunaskanTransaksi = (id) => {
+            const trans = kostData.transaksi.find(t => t.id === id);
+            if(trans) { trans.status = "Lunas"; trans.tglBayar = new Date().toISOString().slice(0,10); saveData(); renderTransaksiPage(container); }
+        };
+        window.hapusTransaksi = (id) => {
+            kostData.transaksi = kostData.transaksi.filter(t => t.id !== id);
+            saveData();
+            renderTransaksiPage(container);
+        };
+    }
+
+    // ========= LOGIN / LOGOUT & NAVIGATION =========
+    function initApp() {
+        loadData();
+        const loginDiv = document.getElementById("loginPage");
+        const dashboardDiv = document.getElementById("dashboardApp");
+        const loginForm = document.getElementById("loginForm");
+        loginForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const user = document.getElementById("username").value;
+            const pass = document.getElementById("password").value;
+            if((user === "admin" && pass === "admin123") || (user && pass)) { // demo fleksibel
+                loginDiv.style.display = "none";
+                dashboardDiv.style.display = "block";
+                render();
+            } else {
+                alert("Login gagal! Gunakan admin/admin123");
+            }
+        });
+        document.getElementById("logoutSidebar").addEventListener("click", () => {
+            dashboardDiv.style.display = "none";
+            loginDiv.style.display = "flex";
+            document.getElementById("username").value = "";
+            document.getElementById("password").value = "";
+        });
+        // menu sidebar
+        document.querySelectorAll(".nav-item").forEach(item => {
+            item.addEventListener("click", (e) => {
+                document.querySelectorAll(".nav-item").forEach(nav => nav.classList.remove("active"));
+                item.classList.add("active");
+                currentPage = item.getAttribute("data-page");
+                render();
+            });
+        });
+    }
+    window.addEventListener("DOMContentLoaded", initApp);
+</script>
+</body>
+</html
