@@ -305,7 +305,7 @@
             <div class="card-panel">
                 <h3><i class="fas fa-receipt"></i> Catat Pembayaran</h3>
                 <div class="form-row">
-                    <select id="transPenyewa"><option value="">-- Pilih Penyewa --</option>${penyewaList.map(p => <option value="${p.id}">${p.nama}</option>)}</select>
+                    <select id="transPenyewa"><option value="">-- Pilih Penyewa --</option>${penyewaList.map(p => `<option value="${p.id}">${p.nama}</option>`)}</select>
                     <input id="transBulan" placeholder="Bulan" value="${new Date().toLocaleString('id', { month: 'long', year: 'numeric' })}">
                     <input id="transJumlah" type="number" placeholder="Jumlah Bayar">
                     <button id="tambahTransaksiBtn" class="btn-primary">Tambah Transaksi</button>
