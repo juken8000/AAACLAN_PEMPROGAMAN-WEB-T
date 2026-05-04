@@ -12,7 +12,7 @@ body {
     font-family: 'Inter', sans-serif;
 }
 
-/* ---------- LOGIN PAGE ---------- */
+
 .login-container {
     display: flex;
     justify-content: center;
@@ -130,7 +130,7 @@ body {
     color: #334155;
 }
 
-/* ---------- DASHBOARD APP (hidden awal) ---------- */
+
 .dashboard-app {
     display: none;
     width: 100%;
@@ -138,14 +138,14 @@ body {
     overflow: hidden;
 }
 
-/* Layout utama */
+
 .app-wrapper {
     display: flex;
     height: 100%;
     width: 100%;
 }
 
-/* SIDEBAR */
+
 .sidebar {
     width: 280px;
     background: #0f172a;
@@ -232,7 +232,7 @@ body {
     color: white;
 }
 
-/* MAIN CONTENT */
+
 .main-content {
     flex: 1;
     overflow-y: auto;
@@ -240,7 +240,7 @@ body {
     background: #f8fafc;
 }
 
-/* Kartu dashboard */
+
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -272,7 +272,6 @@ body {
     color: #3b82f6;
     margin-top: 0.5rem;
 }
-/* Tabel & form */
 .card-panel {
     background: white;
     border-radius: 1.5rem;
@@ -358,23 +357,7 @@ input, select {
     border-radius: 1rem;
     border: 1px solid #cbd5e1;
 }
-.modal-bg {
-    position: fixed;
-    top:0;left:0;width:100%;height:100%;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(3px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-.modal-card {
-    background: white;
-    width: 450px;
-    max-width: 90%;
-    padding: 1.8rem;
-    border-radius: 2rem;
-}
+
 @media (max-width: 768px) {
     .sidebar { width: 80px; }
     .sidebar-header p, .nav-item span:not(.nav-icon) { display: none; }
