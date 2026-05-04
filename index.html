@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Sistem Pengelolaan Kost | Admin Panel</title>
+    <!-- Google Fonts & Font Awesome -->
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- CSS Eksternal -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <i class="fas fa-building"></i>
+            <h2>KostHub</h2>
+            <p>Sistem Manajemen Kost Modern</p>
+        </div>
+        <form id="loginForm">
+            <div class="input-group">
+                <label><i class="fas fa-user"></i> Username</label>
+                <input type="text" id="username" placeholder="admin" autocomplete="off" required>
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-lock"></i> Password</label>
+                <input type="password" id="password" placeholder="••••••" required>
+            </div>
+            <button type="submit" class="btn-login"><i class="fas fa-arrow-right-to-bracket"></i> Masuk Dashboard</button>
+        </form>
+        <div class="demo-cred">
+            <i class="fas fa-info-circle"></i> Demo login: <strong>admin</strong> / <strong>admin123</strong><br>
+            (atau bebas, sistem siap pakai)
+        </div>
+    </div>
+</div>
+
+<!-- DASHBOARD APP (hidden) -->
+<div id="dashboardApp" class="dashboard-app">
+    <div class="app-wrapper">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-home"></i> KostHub</h3>
+                <p>Panel Admin</p>
+            </div>
+            <div class="nav-menu">
+                <div class="nav-item active" data-page="dashboard">
+                    <i class="fas fa-tachometer-alt"></i> <span>Dashboard</span>
+                </div>
+                <div class="nav-item" data-page="kamar">
+                    <i class="fas fa-door-open"></i> <span>Kelola Kamar</span>
+                </div>
+                <div class="nav-item" data-page="penyewa">
+                    <i class="fas fa-users"></i> <span>Penyewa</span>
+                </div>
+                <div class="nav-item" data-page="transaksi">
+                    <i class="fas fa-coins"></i> <span>Transaksi</span>
+                </div>
+            </div>
+            <div class="logout-btn" id="logoutSidebar">
+                <i class="fas fa-sign-out-alt"></i> <span>Keluar</span>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT (area dinamis) -->
+        <div class="main-content" id="mainContent">
+            <div style="text-align:center; padding:2rem;">Memuat data...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ======================= DATA STORAGE =======================
+    let kostData = {
+        kamar: [],
+        penyewa: [],
+        transaksi: []
+    };
+
+    // Data default awal (jika localstorage kosong)
+    const defaultKamar = [
+        { id: "k1", nomor: "A1", harga: 550000, status: "terisi", penyewaId: "p1" },
+        { id: "k2", nomor: "A2", harga: 550000, status: "terisi", penyewaId: "p2" },
+        { id: "k3", nomor: "B1", harga: 600000, status: "kosong", penyewaId: null },
+        { id: "k4", nomor: "B2", harga: 600000, status: "terisi", penyewaId: "p3" }
+    ];
+    const defaultPenyewa = [
+        { id: "p1", nama: "Arkhan Al-Hakim", noHp: "081234567890", kamarId: "k1", tglMasuk: "2026-01-10" },
+        { id: "p2", nama: "Althaf zabran ", noHp: "082345678901", kamarId: "k2", tglMasuk: "2026-02-01" },
+        { id: "p3", nama: "Alfin lambok ", noHp: "083456789012", kamarId: "k4", tglMasuk: "2026-02-15" }
+    ];
+    const defaultTransaksi = [
+        { id: "t1", penyewaId: "p1", bulan: "Maret 2026", jumlah: 550000, status: "Lunas", tglBayar: "2026-03-05" },
+        { id: "t2", penyewaId: "p2", bulan: "Maret 2026", jumlah: 550000, status: "Lunas", tglBayar: "2026-03-10" },
+        { id: "t3", penyewaId: "p3", bulan: "Maret 2026", jumlah: 600000, status: "Belum Lunas", tglBayar: null }
+    ];
+
+    function loadData() {
+        const stored = localStorage.getItem("kostManager");
+        if(stored) {
+            kostData = JSON.parse(stored);
+        } else {
+            kostData = { kamar: defaultKamar, penyewa: defaultPenyewa, transaksi: defaultTransaksi };
+            saveData();
+        }
+        // sinkronisasi status kamar berdasarkan penyewaId
+        kostData.kamar.forEach(kamar => {
+            const adaPenyewa = kostData.penyewa.some(p => p.kamarId === kamar.id);
+            kamar.status = adaPenyewa ? "terisi" : "kosong";
+            if(adaPenyewa) {
+                const p = kostData.penyewa.find(p => p.kamarId === kamar.id);
+                kamar.penyewaId = p.id;
+            } else {
+                kamar.penyewaId = null;
+            }
+        });
+        saveData();
+    }
+
+    function saveData() {
+        localStorage.setItem("kostManager", JSON.stringify(kostData));
+    }
+
+    // helper
+    function getKamarById(id) { return kostData.kamar.find(k => k.id === id); }
+    function getPenyewaById(id) { return kostData.penyewa.find(p => p.id === id); }
+
+    
