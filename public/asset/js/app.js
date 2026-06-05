@@ -133,3 +133,103 @@
     </tr>`;
   }
 /* Lanjutin */
+ const historyMonth = document.getElementById('historyMonth');
+  const historyYear = document.getElementById('historyYear');
+  if (historyMonth && historyYear) {
+    [historyMonth, historyYear].forEach(el => el.addEventListener('change', loadHistory));
+  }
+
+  async function loadHistory() {
+    const url = `${base}?route=api/history&month=${historyMonth.value}&year=${historyYear.value}`;
+    const data = await (await fetch(url)).json();
+    document.getElementById('historyRows').innerHTML = data.rows.map(row => `<tr>
+      <td>${esc(row.description)}</td>
+      <td>${esc(row.paid_at || '-')}</td>
+      <td>${monthName(row.period_month)} ${esc(row.period_year)}</td>
+      <td>${rupiah(row.amount)}</td>
+      <td><span class="badge ${row.status === 'lunas' ? 'green' : 'red'}">${esc(row.status).replace('_', ' ').toUpperCase()}</span></td>
+    </tr>`).join('');
+  }
+
+  const financeMonth = document.getElementById('financeMonth');
+  const financeYear = document.getElementById('financeYear');
+  const financeSearch = document.getElementById('financeSearch');
+  if (financeMonth && financeYear) {
+    [financeMonth, financeYear].forEach(el => el.addEventListener('change', loadFinance));
+    financeSearch && financeSearch.addEventListener('input', debounce(loadFinance, 250));
+  }
+
+  async function loadFinance() {
+    const url = `${base}?route=api/finance&month=${financeMonth.value}&year=${financeYear.value}&q=${encodeURIComponent(financeSearch.value)}`;
+    const data = await (await fetch(url)).json();
+    document.getElementById('incomeRows').innerHTML = data.income.map(row => `<tr>
+      <td>${esc(row.full_name)} / ${esc(row.room_number)}</td>
+      <td>${esc(row.paid_at)}</td>
+      <td>${monthName(row.period_month)} ${esc(row.period_year)}</td>
+      <td>${rupiah(row.amount)}</td>
+    </tr>`).join('');
+    document.getElementById('expenseRows').innerHTML = data.expenses.map(row => `<tr>
+      <td>${esc(row.expense_date)}</td><td>${esc(row.description)}</td><td>${rupiah(row.amount)}</td>
+      <td><form method="post" action="${base}?route=owner/deleteExpense" data-confirm="Hapus pengeluaran ini?"><input type="hidden" name="id" value="${Number(row.id)}"><button class="btn small danger">Hapus</button></form></td>
+    </tr>`).join('');
+    document.getElementById('incomeTotal').textContent = rupiah(data.incomeTotal);
+    document.getElementById('expenseTotal').textContent = rupiah(data.expenseTotal);
+    document.getElementById('netProfit').textContent = rupiah(Number(data.incomeTotal) - Number(data.expenseTotal));
+  }
+
+  const chart = document.getElementById('financeChart');
+  if (chart) drawChart(chart);
+
+  const dpInputWrap = document.getElementById('dpInputWrap');
+  if (dpInputWrap) {
+    const syncDpInput = () => {
+      const selected = document.querySelector('input[name="payment_method"]:checked')?.value;
+      dpInputWrap.classList.toggle('is-visible', selected === 'dp');
+      const input = dpInputWrap.querySelector('input');
+      if (input) input.required = selected === 'dp';
+    };
+    document.querySelectorAll('input[name="payment_method"]').forEach(input => input.addEventListener('change', syncDpInput));
+    syncDpInput();
+  }
+
+  const paymentJump = document.querySelector('[data-payment-jump]');
+  if (paymentJump) {
+    paymentJump.addEventListener('change', () => {
+      window.location.href = `${base}?route=penghuni/payment&bill_id=${paymentJump.value}`;
+    });
+  }
+
+  function drawChart(canvas) {
+    const ctx = canvas.getContext('2d');
+    const data = JSON.parse(canvas.dataset.chart || '{}');
+    const width = canvas.width = canvas.clientWidth * window.devicePixelRatio;
+    const height = canvas.height = 260 * window.devicePixelRatio;
+    const values = Object.values(data).flatMap(v => [Number(v.income), Number(v.expense)]);
+    const max = Math.max(...values, 1);
+    const pad = 34 * window.devicePixelRatio;
+    const gap = 8 * window.devicePixelRatio;
+    const group = (width - pad * 2) / 12;
+    ctx.clearRect(0, 0, width, height);
+    ctx.font = `${12 * window.devicePixelRatio}px Arial`;
+    for (let i = 1; i <= 12; i++) {
+      const x = pad + (i - 1) * group + gap;
+      const incomeH = (Number(data[i]?.income || 0) / max) * (height - pad * 2);
+      const expenseH = (Number(data[i]?.expense || 0) / max) * (height - pad * 2);
+      ctx.fillStyle = '#0f766e';
+      ctx.fillRect(x, height - pad - incomeH, group / 2 - gap, incomeH);
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(x + group / 2, height - pad - expenseH, group / 2 - gap, expenseH);
+      ctx.fillStyle = '#64748b';
+      ctx.fillText(String(i), x + group / 3, height - 8 * window.devicePixelRatio);
+    }
+  }
+
+  function debounce(fn, wait) {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn(...args), wait);
+    };
+  }
+})();
+/* Done */
