@@ -31,7 +31,7 @@
                 <td><?= rupiah($room['price']) ?></td>
                 <td><span class="badge <?= $room['status'] === 'terisi' ? 'green' : 'neutral' ?>"><?= strtoupper($room['status']) ?></span></td>
                 <td><?= e($room['tenant_name'] ?: '-') ?></td>
-                <td><?= $room['image'] ? '<img class="thumb" src="' . e(url('uploads/rooms/' . $room['image'])) . '" alt="Kamar">' : '-' ?></td>
+                <td><?= $room['image'] ? '<img class="thumb" src="' . e(public_url('uploads/rooms/' . $room['image'])) . '" alt="Kamar">' : '-' ?></td>
                 <td class="actions">
                     <button class="btn small" data-fill-room='<?= e(json_encode($room)) ?>' data-open-modal="roomEditModal">Edit</button>
                     <form method="post" action="<?= url('index.php?route=owner/deleteRoom') ?>" data-confirm="Hapus kamar ini?">

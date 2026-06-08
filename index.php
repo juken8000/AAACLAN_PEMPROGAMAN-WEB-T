@@ -1,17 +1,24 @@
 <?php
 
+$sessionPath = __DIR__ . '/storage/sessions';
+if (!is_dir($sessionPath)) {
+    mkdir($sessionPath, 0777, true);
+}
+session_save_path($sessionPath);
 session_start();
 
-require_once __DIR__ . '/../app/config/config.php';
-require_once __DIR__ . '/../app/config/Database.php';
-require_once __DIR__ . '/../app/core/helpers.php';
-require_once __DIR__ . '/../app/core/Model.php';
-require_once __DIR__ . '/../app/core/Controller.php';
-require_once __DIR__ . '/../app/core/Auth.php';
+define('APP_ROOT', __DIR__ . '/app');
+
+require_once APP_ROOT . '/config/config.php';
+require_once APP_ROOT . '/config/Database.php';
+require_once APP_ROOT . '/core/helpers.php';
+require_once APP_ROOT . '/core/Model.php';
+require_once APP_ROOT . '/core/Controller.php';
+require_once APP_ROOT . '/core/Auth.php';
 
 spl_autoload_register(function ($class) {
     foreach (['controllers', 'models'] as $folder) {
-        $file = __DIR__ . '/../app/' . $folder . '/' . $class . '.php';
+        $file = APP_ROOT . '/' . $folder . '/' . $class . '.php';
         if (file_exists($file)) {
             require_once $file;
             return;

@@ -1,6 +1,6 @@
 (function () {
   const base = window.KOSTRACK_BASE || 'index.php';
-  const publicBase = base.replace('/index.php', '');
+  const publicBase = window.KOSTRACK_PUBLIC_BASE || base.replace('/index.php', '');
   const rupiah = (value) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(Number(value || 0));
   const monthName = (m) => ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][Number(m)] || '-';
   const esc = (text) => String(text ?? '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[s]));
