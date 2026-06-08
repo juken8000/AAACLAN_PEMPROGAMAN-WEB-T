@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($title ?? APP_NAME) ?> - <?= APP_NAME ?></title>
-    <link rel="stylesheet" href="<?= url('assets/css/style.css') ?>">
+    <link rel="stylesheet" href="<?= public_url('asset/css/style.css') ?>">
 </head>
 <body>
 <div class="app-shell">
