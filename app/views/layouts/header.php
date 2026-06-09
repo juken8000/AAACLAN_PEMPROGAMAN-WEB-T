@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($title ?? APP_NAME) ?> - <?= APP_NAME ?></title>
-    <link rel="stylesheet" href="<?= public_url('asset/css/style.css') ?>">
+    <link rel="stylesheet" href="<?= url('assets/css/style.css') ?>">
 </head>
 <body>
 <div class="app-shell">
@@ -32,7 +32,7 @@
             </nav>
         </aside>
     <?php endif; ?>
-    <main class="<?= $user ? 'content' : 'auth-content' ?>">
+    <main class="<?= e($user ? 'content' : ($mainClass ?? 'auth-content')) ?>">
         <?php foreach (['success', 'error', 'warning'] as $type): ?>
             <?php if ($msg = flash($type)): ?>
                 <div class="alert <?= $type ?>"><?= e($msg) ?></div>
