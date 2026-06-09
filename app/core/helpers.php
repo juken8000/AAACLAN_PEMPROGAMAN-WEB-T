@@ -5,11 +5,6 @@ function url(string $path = ''): string
     return rtrim(BASE_URL, '/') . '/' . ltrim($path, '/');
 }
 
-function public_url(string $path = ''): string
-{
-    return url(PUBLIC_URL_PREFIX . ltrim($path, '/'));
-}
-
 function redirect(string $route): void
 {
     header('Location: ' . url('index.php?route=' . $route));

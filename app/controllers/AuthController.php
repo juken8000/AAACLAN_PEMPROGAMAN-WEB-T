@@ -15,9 +15,18 @@ class AuthController extends Controller
         if (Auth::check()) {
             redirect(Auth::user()['role'] === 'owner' ? 'owner/dashboard' : 'penghuni/dashboard');
         }
+        $selectedRoomId = (int) ($_GET['room_id'] ?? 0);
+        $availableRooms = (new Room())->available();
+        $selectedRoomIds = array_map('intval', array_column($availableRooms, 'id'));
+        if ($selectedRoomId > 0 && !in_array($selectedRoomId, $selectedRoomIds, true)) {
+            flash('warning', 'Kamar yang dipilih tidak tersedia. Silakan pilih kamar kosong lainnya.');
+            $selectedRoomId = 0;
+        }
+
         $this->view('auth/register', [
             'title' => 'Daftar Akun',
-            'availableRooms' => (new Room())->available(),
+            'availableRooms' => $availableRooms,
+            'selectedRoomId' => $selectedRoomId,
         ]);
     }
 

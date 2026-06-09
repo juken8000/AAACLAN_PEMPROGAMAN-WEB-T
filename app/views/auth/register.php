@@ -33,7 +33,7 @@
                     <select name="role" id="registerRole" required>
                         <option value="">-- Pilih Role --</option>
                         <option value="owner">Pemilik Kost</option>
-                        <option value="penghuni">Penghuni Kost</option>
+                        <option value="penghuni" <?= !empty($selectedRoomId) ? 'selected' : '' ?>>Penghuni Kost</option>
                     </select>
                 </label>
                 <label id="ownerCodeWrap">Kode Verifikasi Pemilik
@@ -43,7 +43,7 @@
                     <select name="room_id" id="registerRoom">
                         <option value="">-- Pilih Kamar --</option>
                         <?php foreach ($availableRooms as $room): ?>
-                            <option value="<?= (int) $room['id'] ?>">
+                            <option value="<?= (int) $room['id'] ?>" <?= ((int) $room['id'] === (int) ($selectedRoomId ?? 0)) ? 'selected' : '' ?>>
                                 Kamar <?= e($room['room_number']) ?> - <?= e($room['type']) ?> - <?= rupiah($room['price']) ?>
                             </option>
                         <?php endforeach; ?>
